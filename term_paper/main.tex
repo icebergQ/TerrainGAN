@@ -1,0 +1,168 @@
+\documentclass[conference]{IEEEtran}
+%\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+% \usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{empheq}
+\usepackage{wrapfig}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }%
+\algtext*{Indent}
+\algtext*{EndIndent}
+\newcommand\myeq{\stackrel{\mathclap{\normalfont\mbox{def}}}{=}}
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{A comparative evaluation of approximate Byzantine Vector Consensus algorithms by Vaidya and Garg and by Hammurabi and Herlihy 
+\thanks{Identify applicable funding agency here. If none, delete this.}
+}
+
+\author{\IEEEauthorblockN{Kai Qin}
+\IEEEauthorblockA{\textit{Dept. of Electrical and Computer Engineering} \\
+\textit{University of Texas at Austin}\\
+Austin, TX \\
+kai.qin@utexas.edu}
+\and
+\IEEEauthorblockN{Yi Han}
+\IEEEauthorblockA{\textit{Dept. of Electrical and Computer Engineering} \\
+\textit{University of Texas at Austin}\\
+Austin, TX \\
+yh5598@utexas.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+This document is for the final project of EE382N-Distributed System about A comparative evaluation of approximate Byzantine Vector Consensus algorithms by Vaidya and Garg and by Hammurabi and Herlihy.
+\end{abstract}
+
+% \begin{IEEEkeywords}
+% component, formatting, style, styling, insert
+% \end{IEEEkeywords}
+
+\section{Introduction}
+We implemented the Mendes-Herlihy algorithm and the Vaidya-Garg algorithm shown in Algorithm 1 and 3. Both algorithms are for multidimensional byzantine approximate agreement problem. 
+The problem we are trying to analyze in this project is ``the $Multidimensional$ 
+$Byzantine$ $Approximate$ $Agreement$ (MBA) for asynchronous systems. The problem requires processes to decide on multiple d-dimensional vectors in $R^d$, all within a fixed Euclidean distance $\epsilon$ of each other and inside the convex hull of d-dimensional vectors that were given by the non-faulty processes"\cite{b1} In an asynchronous system. It is well known according to FLP\cite{b2}, byzantine binary consensus is impossible under a single crash failure. In the approximate agreement problem, not all processes are required to agree on the same output, but they all need to be within a fixed Euclidean distance $\epsilon$. The following result was obtained by this paper\cite{b1} for the MBA problem, in a fully connected distributed system with up to f Byzantine failures:\\
+-- In asynchronous systems, $n>(d+2)f$ is necessary and sufficient to solve the multidimensional approximate agreement problem.
+The assumptions for this algorithm includes FIFO, reliable communication channels, and fully connected distributed network. 
+For solving MBA, a protocol must satisfy the following conditions given by this paper\cite{b1}:\\
+-- ``$Agreement$. The output vectors of non-faulty processes should be within Euclidean distance $\epsilon>0$, a constant deﬁned a $priori$. Formally, for any $p_i$ and $p_j$ in $G$, we have that $d(O_i,O_j) \leq \epsilon$,where $d(O_i,O_j)$ is the Euclidean distance between $O_i$ and $O_j$ in the appropriate Euclidean space."\\
+--``$Validity$. The output vector at all non-faulty processes must be inside the convex hull of the input inputs. Formally, $O_i \in Poly(I_G)$ for any $pi \in G.$ \\
+--``$Termination$. Each non-faulty process must terminate within a finite amount of time.\\
+\begin{algorithm}
+\caption{The Mendes-Herlihy Algorithm}
+\begin{algorithmic}[1]
+\State $(R, v) \leftarrow $ CalculateRounds$($I$)$
+\For {m $\rightarrow$ 1,....,d}
+\State H$\leftarrow \varnothing$ 
+\State r$\leftarrow$ 1
+\While {$|H| \leqslant f$}
+\State RBSend$((p, m.r, v))$
+\State \textbf{upon} V $\leftarrow$ RBReceiveWitness$(m.r)$ \textbf{do}
+\Indent
+\State S $\leftarrow$ Safe$(V)$
+\State v $\leftarrow$ v $\in$ S such that v$[m]$ = Midpoint$(S(m))$ 
+\State \textbf{if} r $=$ R \textbf{then}
+\Indent 
+\State RBSend$((p, m.r, {halt}))$
+\EndIndent
+\State r $\leftarrow$ r $+$ 1
+\EndIndent
+\State \textbf{upon} RBRecv$((p', m.r', {halt})),$ with $r'\geqslant$ r \textbf{do}
+\Indent
+\State H $\leftarrow$ H $\cup$  $((p', m.r', {halt}))$
+\EndIndent
+\EndWhile
+\EndFor
+\State return v
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{p.CalculateRounds(I)}
+\begin{algorithmic}[1]
+\State $RBSend((p,0,I))$
+\State $(V,W) \gets (Val,Content(Wit)) from RBReceiveWitness(0)$
+\State $U \gets {barycenter of Safe_f(W'): W'\in W}$
+\State $v \gets barycenter of Safe_f(U)$
+\State $R \gets \lceil\log_2(\sqrt{d}/\epsilon) max(\sigma_U(m):1\leq m\leq d))\rceil$\\
+\Return $(R,v)$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{The Vaidya-Garg Algorithm}
+\begin{algorithmic}[1]
+\State $R \gets 1+\log_{1/(1-\gamma)}\frac{\sqrt{d}(U-v)}{\epsilon}$
+\For{r $\rightarrow$ 1,.... R}
+\State RBSend$((p,r,v))$
+\State \textbf{upon} M $\leftarrow$ RBReceiveWitness$(r)$\textbf{ do}
+\Indent
+\For{$M' \subseteq M, |M'|=n-f$}
+\State $S_{M'} \leftarrow Safe_f(M')$
+\State Z $\leftarrow$ Z $\cup$ DeterministicallyChoosePoint$(S_{M'})$
+\EndFor
+\State v $\leftarrow (\Sigma_{z \in Z}z)$ $/|Z|$
+\EndIndent
+\EndFor\\
+\Return $v$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Implementation Setup}
+We choose to implement a robot convergence problem to examine the message and time complexity of each algorithm.We setup the same environment used to test both algorithms with the following properties:\\
+(1) There are total of 6 servers with 1 byzantine server.\\
+(2) Each server is fully connected to other servers with TCP connections.\\
+(3) Each server has an input of 2 dimensional vector that initially form a convex shape.\\
+(4) The byzantine server will initially send random input vector values to all other servers.\\
+(5) When implementing $if\ never\ sent$ in function $RBEcho_f$, we saved the sender's pid as key in a hash table and save the number of time we sent the corresponding message as value in the hash table.  \\
+(6) Since we are working on the 2 dimensional case of the MBA problem, we wrote our $Safe_f$ function based on the Safe Area definition, where we take intersection (see fig \ref{my_label1} of an exemple of how we took intersections\cite{b6})of any two $Restrict_f$ of the input message set and returns the vertices of the resulting convex hull. \\
+(7) In line 9 of algorithm 6, the process computes, $S(m)$ the projection of the safe area on coordinate $m$, then choose a point in the safe area such that its $m$-th coordinate is in the midpoint of $S(m)$. Here we choose the other coordinate such that it is in the midpoint of the interval of the safe area as well.  
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{Capture.PNG}
+    \caption{Example results of take intersection of two convex hull.}
+    \label{my_label1}
+\end{figure}
+\section{Message Complexity Comparison}
+ In MH algorithm, each non-faulty process spends $O(n^2)$ messages for reliable broadcast and the witness algorithm for each round. The overall message complexity for all the rounds is 
+ \begin{equation}
+     O(n^2d\log(d/\epsilon\ max(\sigma_{I_G}(m):1\leq m\leq d)).
+ \end{equation}
+ In VG algorithm the overall message complexity for all the rounds is 
+ \begin{equation}
+     O(n^2d\log_{1/(1-\gamma)}(d/\epsilon\  max(\sigma_{I_G}(m):1\leq m\leq d)).
+ \end{equation}
+\section{Experimental Time Comparison}
+For live demo time result comparison, We setup a millisecond time counter that began at the initiation phase of running the algorithms, and logs the time elapsed. For the MH algorithm, initial calculate round function requires around 3000 milliseconds to complete. Both algorithms depend on reliable broadcast and receive witness, thus their time for each round is similar at around 3000 to 4000 milliseconds. The number of rounds needed for The VG algorithm is significantly higher than the MH algorithm, therefore the completion of MH algorithm is faster than the VG Algorithm. Since Our implementation of each process is thread based, accuracy of the logged elapsed time may not be true reflection of a real world implementation of these algorithms. 
+
+\section{Algorithm Comparison Observations}
+According to the original paper, ``MH\cite{b3} algorithm has an asymptotically constant convergence factor in relation to n, but requires certain geometrical operations too restrictive for applications such as robot navigation.  In such application, instead of exchanging messages, processes obtain information via visual sensors, projecting them over private coordinate systems. The VG\cite{b4} algorithm is better suited for the application above, at the cost of a slower convergence,now asymptotically dependent on n,the number of processes." \\
+
+
+\section{Future Works}
+While implementing the two algorithms, we found it useful to create more comparative methods to show the convergence factor differences. More visualization tools would be useful in further displaying convergence comparisons.  
+During the implementation of this project, we focused on the 2-dimensional scenario, in the next step, we can further expand on the dimensions based on the linear programming algorithm provided in the appendix of the paper. \\
+Robot convergence is one of the more physically tangible application of byzantine vector consensus, other problems such as distributed voting can equally utilize the agreement.\\ 
+
+
+\begin{thebibliography}{00}
+\bibitem{b1} Mendes H, Herlihy M, Vaidya N, Garg VK. Multidimensional agreement in Byzantine systems. Distributed Computing. 2015 Dec 1;28(6):423-41.
+\bibitem{b2} Lamport, L., Shostak, R., Pease, M.: The byzantine generals problem. ACM Trans. Program. Lang. Syst. 4(3), 382–401 (1982).
+\bibitem{b3 }Mendes, H., Herlihy, M.: Multidimensional approximate agreementinbyzantineasynchronoussystems. In:Proceedings of the 45th annual ACM symposium on Symposium on theory of computing, STOC ’13, pp. 391–400. ACM, New York, NY, USA (2013). 
+\bibitem{b4} Vaidya,N.,Garg,V.K.:Byzantine vector consensus incomplete graphs. In: Proceedings of the 2013 ACM symposium on Principles of distributed computing, PODC ’13. ACM, New York, NY, USA (2013)
+\bibitem{b5}Potop-Butucaru, M., Raynal, M., Tixeuil, S.: Distributed computing with mobile robots: An introductory survey. In: 14th International Conference on Network-Based Information Systems (NBiS), pp. 318 –324 (2011). 
+\bibitem{b6}Intersection of Convex Polygons Algorithm, by By Sinan Oz, https://www.swtestacademy.com/intersection-convex-polygons-algorithm/
+\bibitem{b7}The Centroid of Convex Polygons by Gilles Bellot, https://bell0bytes.eu/centroid-convex/
+\end{thebibliography}
+\end{document}
