@@ -1,2 +1,2 @@
 # TerrainGAN
-TerrainGAN Cool 
+TerrainGAN very Cool 
