@@ -56,7 +56,6 @@ $Byzantine$ $Approximate$ $Agreement$ (MBA) for asynchronous systems. The proble
 -- In asynchronous systems, $n>(d+2)f$ is necessary and sufficient to solve the multidimensional approximate agreement problem.
 The assumptions for this algorithm includes FIFO, reliable communication channels, and fully connected distributed network. 
 For solving MBA, a protocol must satisfy the following conditions given by this paper\cite{b1}:\\
--- ``$Agreement$. The output vectors of non-faulty processes should be within Euclidean distance $\epsilon>0$, a constant deﬁned a $priori$. Formally, for any $p_i$ and $p_j$ in $G$, we have that $d(O_i,O_j) \leq \epsilon$,where $d(O_i,O_j)$ is the Euclidean distance between $O_i$ and $O_j$ in the appropriate Euclidean space."\\
 --``$Validity$. The output vector at all non-faulty processes must be inside the convex hull of the input inputs. Formally, $O_i \in Poly(I_G)$ for any $pi \in G.$ \\
 --``$Termination$. Each non-faulty process must terminate within a finite amount of time.\\
 \begin{algorithm}
