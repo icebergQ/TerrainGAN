@@ -2,6 +2,8 @@ HTile/
 TTile/
 .ipynb_checkpoints/
 
+HyperparameterData/
+
 *.aux
 *.glo
 *.idx
