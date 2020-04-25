@@ -40,7 +40,7 @@ yh5598@utexas.edu}
 \maketitle
 
 \begin{abstract}
-This document is for the term project of EE382V Introduction to Optimization
+This report is for the term project of EE381V Introduction to Optimization
 \end{abstract}
 
 % \begin{IEEEkeywords}
@@ -48,6 +48,37 @@ This document is for the term project of EE382V Introduction to Optimization
 % \end{IEEEkeywords}
 
 \section{Introduction}
+GAN has been used in numerous senarios in industrial applications such as Anime generation, human-face generation, video generation. In this study, we focus on terrain generation using GAN especially in game terrain generation with training data from height map taken by satelite using radar sensors. The goal of this project can be separated into two parts. The first one is to learn different gradient-based optimization algorithms such as SGD, SGD with momentum, RMSProp, and ADAM. The second part is comparative evaluation of the performence of each optimizer.
+
+ADAM was used in the original paper of DC GAN and LSGAN, and thus was our first choice optimizer. However,
+\section{SGD with momentum}
+Assuming the audiences are familiar with the general ideas of gradient descent, where we ``decrease the loss function by moving in the direction of the negative gradient of an entire training set.'' ``The vanilla gradient descent may be accelerated considerably by using Stochastic gradient descent to follow the gradient of randomly selected minibatches.''``While SGD remains a very popluar algorithm, learning with it can sometimes be very slow. For example, let's say that you're trying to optimize a cost function which has contours like this image. The red dot denotes the position of the minimum. And we can see this up and own oscillations slows down the gradient descent. The basic idea of SGD with momentum, in one sentence, is to compute an exponentially decaying moving average of past gradients and continues to move in that direction. This method can help SGD to accelerate learning process. To understand how to compute the exponentially weighted averages of the last N iterations where N is determined by the hyperparameter alpha the algorithm, for example, when alpha equals .99, which is commonly used in practice, we are averaging over the last 100 iterations. Because after 100 days the weight becomes about a third of the weight of the current day. It is not a very accurage way to calculate the average value over the last N days, but it takes very little memory. The image on the right illustrates the effect of momentum, if you average out these gradients of the black arrows, you can find that the oscillations in the right diagonal direction will tend to average out to something closer to zero. In the mean time, it will keep the direvative on the left diagonal direction. So this allows the optimizer to take a more straight foward path or to damp out the oscillations in the path to the minimum.'' 
+
+The hyper prameters we have here are learning rate, beta, beta2, batch size. 
+The SGD gradient estimator introduces a source of noise which makes the optimizer oscliates when we arrive around a minimum, thus it is common to decay the learning rate.
+\section{RMSProp}
+``there is another algorithm called RMSProp, which stands for root mean square prop, that can also speed up gradient descent. The algorithm is very similar to SGD with momentum, but instead of accumulating the gradient, we are taking average of the sqaured gradient and divide the gradient by the sqaure root of the average squared gradient. By dividing the average magnitude of the derivative in each dimenstion, the net effect is that the right diagonal derivative is devided by a relatively larger number and so that helps damp out the oscillations. Comparing to SGD with momentum, we can use a larger learning rate, and get faster learning without diverging the right diagonal direction, where in SGD with momentum, the learning rate is applying to all each dimension with same step size.''
+\section{Adam}
+By combining the ideas of momentum and RMSProp, we get Adam optimization algorithm which has been shown to work well across a wider range of deep learning architectures. In Adam, in each iteration, we first update the first moment estimate (the mean of the derivatives), which is exactly what we had when we're implementing momentum. And similarly, we do the rms prop to update the second moment estimate (the exp weighted average of the squared gradient). Then we do bias corrections. Finally, we compute the update by dividing the bias corrected first moment estimate with the sqaure root of the second moment estimate and reversing the sign. ``This is commonly used learning algorithm that is proven to be very effective for many different neural networks of a variety of architectures.'' Common choices for ro1, ro2, sigma are 0.9, 0.99 and 10 to -8 respectively. The common pratice for Adam hyperparameter tunning is to keep ro1 and ro2, and delta default and try a range of values of the learning rate to see what works best.
+\section{AdaGrad}
+AdaGrad can be understood as a special condition of RMSProp.
+\section{Discussion about metrics}
+1 pixel is 1 square km;
+Original image pixel 21600x10800, and with 128x128 there are 14000, we excluded the ocean by excluding images with 90 percent pixels with max minors min value less than 0.05 (total range is from 0 to 1). And we end up with 4305. We have excluded flat land and waters, so we expect no such images from the output. We propose a metric of max -min / min as a metric.
+
+Compare performence of each optimizer:
+we need a metric to tell if the generated image is good or bad.
+Based on our goal, we want noticeable feasures like mountains or lakes, valley, coasts.
+Compare min-max diff histogram of the trainning data and the output data.
+
+Distribution distances: KL-divergence
+\section{Results}
+Sometime it oscilates and don't converge. That's one of the big challenge of GAN training is that you don't get this clean monotonic improvment that your are used to with training supervised models.
+
+``It is still an open probelm to have good metrics. If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it'' ``Assuming you don't do optimization directly on the Frechet Inception Distance, it can be a nice independent measure of the amount of variantion and cristness of the image generated ; when you do optimize against it, you will find results not exactly what you want''
+Adam 0.0002 lr and 16 batch size, we think based on the 3d model generated by this software looks realistic enough to meet our experience. We manually sweeped the lr rate and batch size using ADAM and collected the loss fuction over trainnign iterations. Next step will colecte results using other optimizers and figure out a metric to quantify the results we see. The discriminitor can always 
+\section{Disctributed Term Paper}
+
 We implemented the Mendes-Herlihy algorithm and the Vaidya-Garg algorithm shown in Algorithm 1 and 3. Both algorithms are for multidimensional byzantine approximate agreement problem. 
 The problem we are trying to analyze in this project is ``the $Multidimensional$ 
 $Byzantine$ $Approximate$ $Agreement$ (MBA) for asynchronous systems. The problem requires processes to decide on multiple d-dimensional vectors in $R^d$, all within a fixed Euclidean distance $\epsilon$ of each other and inside the convex hull of d-dimensional vectors that were given by the non-faulty processes"\cite{b1} In an asynchronous system. It is well known according to FLP\cite{b2}, byzantine binary consensus is impossible under a single crash failure. In the approximate agreement problem, not all processes are required to agree on the same output, but they all need to be within a fixed Euclidean distance $\epsilon$. The following result was obtained by this paper\cite{b1} for the MBA problem, in a fully connected distributed system with up to f Byzantine failures:\\

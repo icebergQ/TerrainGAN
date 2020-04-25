@@ -1,5 +1,6 @@
 HTile/
 TTile/
+.ipynb_checkpoints/
 
 *.aux
 *.glo
