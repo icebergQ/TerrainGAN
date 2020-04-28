@@ -1,8 +1,10 @@
 HTile/
 TTile/
 .ipynb_checkpoints/
-
+data/
 HyperparameterData/
+
+lsganimages/
 
 *.aux
 *.glo
