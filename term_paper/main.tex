@@ -39,30 +39,54 @@ yh5598@utexas.edu}
 
 \maketitle
 
-\begin{abstract}
-This report is for the term project of EE381V Introduction to Optimization
-\end{abstract}
+%\begin{abstract}
+%This report is for the term project of EE381V Introduction to Optimization.
+%\end{abstract}
 
 % \begin{IEEEkeywords}
 % component, formatting, style, styling, insert
 % \end{IEEEkeywords}
 
 \section{Introduction}
-GAN has been used in numerous senarios in industrial applications such as Anime generation, human-face generation, video generation. In this study, we focus on terrain generation using GAN especially in game terrain generation with training data from height map taken by satelite using radar sensors. The goal of this project can be separated into two parts. The first one is to learn different gradient-based optimization algorithms such as SGD, SGD with momentum, RMSProp, and ADAM. The second part is comparative evaluation of the performence of each optimizer.
+Generative Adversarial Networks (GAN)\cite{goodfellow2014generative} have been wildy used in generative applications such as anime generation, human-face generation, and video generation. In this study, we focus on evaluating the performence of three gradient-based optimization algorithms in training GANs for procedural terrain generation\cite{beckham2017step}. "Procedural terrain generation for video games has been traditionally done with smartly designed but handcrafted algorithms that generate hightmaps" \cite{beckham2017step} $\{DESCRIBE\  dataset\}$ The first goal of this project is for us as a term project to extend what we have learned in class about gradient-based optimization algorithms and to dive deeper in this topic by experimenting with three state-of-the-art gradient based algorithm for training neural networks. The second goal is to explore the practical differences that each optimizer can make for TerrianGAN. The third goal is to understands the results of fine-tuning parameters on the different optimizers and their effects on TerrianGAN.  
 
-ADAM was used in the original paper of DC GAN and LSGAN, and thus was our first choice optimizer. However,
-\section{SGD with momentum}
-Assuming the audiences are familiar with the general ideas of gradient descent, where we ``decrease the loss function by moving in the direction of the negative gradient of an entire training set.'' ``The vanilla gradient descent may be accelerated considerably by using Stochastic gradient descent to follow the gradient of randomly selected minibatches.''``While SGD remains a very popluar algorithm, learning with it can sometimes be very slow. For example, let's say that you're trying to optimize a cost function which has contours like this image. The red dot denotes the position of the minimum. And we can see this up and own oscillations slows down the gradient descent. The basic idea of SGD with momentum, in one sentence, is to compute an exponentially decaying moving average of past gradients and continues to move in that direction. This method can help SGD to accelerate learning process. To understand how to compute the exponentially weighted averages of the last N iterations where N is determined by the hyperparameter alpha the algorithm, for example, when alpha equals .99, which is commonly used in practice, we are averaging over the last 100 iterations. Because after 100 days the weight becomes about a third of the weight of the current day. It is not a very accurage way to calculate the average value over the last N days, but it takes very little memory. The image on the right illustrates the effect of momentum, if you average out these gradients of the black arrows, you can find that the oscillations in the right diagonal direction will tend to average out to something closer to zero. In the mean time, it will keep the direvative on the left diagonal direction. So this allows the optimizer to take a more straight foward path or to damp out the oscillations in the path to the minimum.'' 
+
+\section{Gradient-based optimization algorithms review}
+
+Before we dive into the evaluation of three gradient-based optimizer we compared in this study, SGD with momentum, RMSProp, and ADAM, we want to provide a review of these three algorithms. We will start from the classic gradient descent algorithm. In one sentence, the general idea of the classic gradient descent algorithm is that at every iteration, the desired parameters are moving in the direction of the negtive gradient of the entire training dataset to decrease the loss function. The vanilla gradient descent may be accelerated considerably by using stochastic gradient descent (SGD) which follows the gradient of randomly selected minibatches. Even though SGD provides a very important idea, learning with it can sometimes be very slow. For example, let's say that you're trying to optimize a cost function which has contours like this image. The red dot denotes the position of the minimum. And we can see this up and own oscillations slows down the gradient descent. Thus, it's rear to see large scale neural network training with the classic SGD. That's why SGD with momentum was introduced. The basic idea of SGD with momentum is to compute an exponentially decaying moving average of past gradients and continues to move in that direction\cite{goodfellow2016deep}. The exponentially weighted averages of the last N iterations where N is determined by the hyperparameter alpha the algorithm, for exambple, when alpha equals $0.99$, which is commonly used in practice, we are approximately averaging over the last 100 iterations. Because after 100 days the weight becomes about a third of the weight of the current day. It is not a very accurage way to calculate the average value over the last N days, but it takes very little memory. The image on the right illustrates the effect of momentum, if you average out these gradients of the black arrows, you can find that the oscillations in the right diagonal direction will tend to average out to something closer to zero. In the mean time, it will keep the direvative on the left diagonal direction. So this allows the optimizer to take a more straight foward path or to damp out the oscillations in the path to the minimum.
 
 The hyper prameters we have here are learning rate, beta, beta2, batch size. 
 The SGD gradient estimator introduces a source of noise which makes the optimizer oscliates when we arrive around a minimum, thus it is common to decay the learning rate.
-\section{RMSProp}
-``there is another algorithm called RMSProp, which stands for root mean square prop, that can also speed up gradient descent. The algorithm is very similar to SGD with momentum, but instead of accumulating the gradient, we are taking average of the sqaured gradient and divide the gradient by the sqaure root of the average squared gradient. By dividing the average magnitude of the derivative in each dimenstion, the net effect is that the right diagonal derivative is devided by a relatively larger number and so that helps damp out the oscillations. Comparing to SGD with momentum, we can use a larger learning rate, and get faster learning without diverging the right diagonal direction, where in SGD with momentum, the learning rate is applying to all each dimension with same step size.''
-\section{Adam}
-By combining the ideas of momentum and RMSProp, we get Adam optimization algorithm which has been shown to work well across a wider range of deep learning architectures. In Adam, in each iteration, we first update the first moment estimate (the mean of the derivatives), which is exactly what we had when we're implementing momentum. And similarly, we do the rms prop to update the second moment estimate (the exp weighted average of the squared gradient). Then we do bias corrections. Finally, we compute the update by dividing the bias corrected first moment estimate with the sqaure root of the second moment estimate and reversing the sign. ``This is commonly used learning algorithm that is proven to be very effective for many different neural networks of a variety of architectures.'' Common choices for ro1, ro2, sigma are 0.9, 0.99 and 10 to -8 respectively. The common pratice for Adam hyperparameter tunning is to keep ro1 and ro2, and delta default and try a range of values of the learning rate to see what works best.
-\section{AdaGrad}
-AdaGrad can be understood as a special condition of RMSProp.
+
+Root mean squared prop (RMSProp) is another algorithm that can speed up classic gradient descent. This algorithm is very similar to SGD with momentum, but instead of accumulating the gradient, we are taking the average of the sqaured gradient and divide the gradient by the sqaure root of the average squared gradient. By dividing the average magnitude of the derivative in each dimenstion, the net effect is that the right diagonal derivative is devided by a relatively larger number and so that helps damp out the oscillations. Comparing to SGD with momentum, we can use a larger learning rate, and get faster learning without diverging the right diagonal direction, where in SGD with momentum, the learning rate is applying to all each dimension with same step size.''
+
+ADAM was used in the original paper of DC GAN and LSGAN, and thus was our first choice optimizer. However,By combining the ideas of momentum and RMSProp, we get Adam optimization algorithm which has been shown to work well across a wider range of deep learning architectures. In Adam, in each iteration, we first update the first moment estimate (the mean of the derivatives), which is exactly what we had when we're implementing momentum. And similarly, we do the rms prop to update the second moment estimate (the exp weighted average of the squared gradient). Then we do bias corrections. Finally, we compute the update by dividing the bias corrected first moment estimate with the sqaure root of the second moment estimate and reversing the sign. ``This is commonly used learning algorithm that is proven to be very effective for many different neural networks of a variety of architectures.'' Common choices for ro1, ro2, sigma are 0.9, 0.99 and 10 to -8 respectively. The common pratice for Adam hyperparameter tunning is to keep ro1 and ro2, and delta default and try a range of values of the learning rate to see what works best.
+
+\section{GAN, DCGAN, and LSGAN review}
+GAN was originally proposed by Ian Goodfellow in \cite{goodfellow2014generative}
+\section{Experiments and results}
+As we can see in the graph on the right, the loss function of both G and D oscilate and don't converge. That's one of the big challenge of GAN training is that you don't get this clean monotonic improvment that your are used to with training supervised models.In GANs, the objective function for the generator and the discriminator usually measures how well they are doing relative to the opponent. For example, we measure how well the generator is fooling the discriminator.
+
+
+Sometime it oscilates and don't converge. That's one of the big challenge of GAN training is that you don't get this clean monotonic improvment that your are used to with training supervised models.
+
+
+``It is still an open probelm to have good metrics. If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it'' ``Assuming you don't do optimization directly on the Frechet Inception Distance, it can be a nice independent measure of the amount of variantion and cristness of the image generated ; when you do optimize against it, you will find results not exactly what you want''
+Adam 0.0002 lr and 16 batch size, we think based on the 3d model generated by this software looks realistic enough to meet our experience. We manually sweeped the lr rate and batch size using ADAM and collected the loss fuction over trainnign iterations. Next step will colecte results using other optimizers and figure out a metric to quantify the results we see. The discriminitor can always 
+
 \section{Discussion about metrics}
+As we have seen in loss graph, the oscilation of the loss makes it harder to measrue the training progress. Currently, It is still an open probelm for gan training to have good metrics. On the other hand, If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it. Inception score and FID are two state of the art metric people use to measure the performence. However, both metrics don't apply to the data we. Inception score requires categorical labeled data.  The Frechet Inception Distance score (FID) requires a pre-trained classification neural network. Since the goal of gan is to learn the probability distribution from the training data, and implicitly represent it using neurual network.  Thus we have proposed a new metric to measure the Terrain GAN performance, the KL-divergence between normalized intensity histogram of training images and generated images.
+
+This is how way calculate this metric, first: Image intensity histogram, which is a widly used technique in image processing. The definition is that Histograms plots how many times (frequency) each intensity value in an image occurs. Here we have a example of intensity histogram of a generated hight map.
+
+However we want the distribuion over a large set of images, the original intensity historgram doesn't work here, so we calculate the average occurrences of each intensity value and divide it by the total number of pixels over all images, and define it the normalized histogram. The top image shows the normalized itensity histogram of the training images. The bottom image shows the normalized itensity histogram of 50 generated image using the neural net trianed by Adam with lr .0002 and batchsize 16 for 150 epchos. We can see that they both have mean around 30 gray levels.
+
+Finally, Here is the KL divergence equation. In our case the P(x) is the real dist and QX is the generated hight map. From the normalized histogram we can tell that the ADAM has more overlap than the sgd. This also matches what we see from the generated images. And the KL divergence value confirmed our observations. The SGD with this set of hyper prameter has no overlap with the training data thus the KL div is +inf.
+
+Here is a bar plot of the KL divergence of different hyperprameter settings of adam after 150 ephch. Visually, we  can see that the higher the metric, the harder you can provide some geographic meaning to the generated images.
+
+Again, we have all the results of the lowest KL divergence model.
+
 1 pixel is 1 square km;
 Original image pixel 21600x10800, and with 128x128 there are 14000, we excluded the ocean by excluding images with 90 percent pixels with max minors min value less than 0.05 (total range is from 0 to 1). And we end up with 4305. We have excluded flat land and waters, so we expect no such images from the output. We propose a metric of max -min / min as a metric.
 
@@ -72,125 +96,15 @@ Based on our goal, we want noticeable feasures like mountains or lakes, valley, 
 Compare min-max diff histogram of the trainning data and the output data.
 
 Distribution distances: KL-divergence
-\section{Results}
-Sometime it oscilates and don't converge. That's one of the big challenge of GAN training is that you don't get this clean monotonic improvment that your are used to with training supervised models.
-
-``It is still an open probelm to have good metrics. If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it'' ``Assuming you don't do optimization directly on the Frechet Inception Distance, it can be a nice independent measure of the amount of variantion and cristness of the image generated ; when you do optimize against it, you will find results not exactly what you want''
-Adam 0.0002 lr and 16 batch size, we think based on the 3d model generated by this software looks realistic enough to meet our experience. We manually sweeped the lr rate and batch size using ADAM and collected the loss fuction over trainnign iterations. Next step will colecte results using other optimizers and figure out a metric to quantify the results we see. The discriminitor can always 
-\section{Disctributed Term Paper}
-
-We implemented the Mendes-Herlihy algorithm and the Vaidya-Garg algorithm shown in Algorithm 1 and 3. Both algorithms are for multidimensional byzantine approximate agreement problem. 
-The problem we are trying to analyze in this project is ``the $Multidimensional$ 
-$Byzantine$ $Approximate$ $Agreement$ (MBA) for asynchronous systems. The problem requires processes to decide on multiple d-dimensional vectors in $R^d$, all within a fixed Euclidean distance $\epsilon$ of each other and inside the convex hull of d-dimensional vectors that were given by the non-faulty processes"\cite{b1} In an asynchronous system. It is well known according to FLP\cite{b2}, byzantine binary consensus is impossible under a single crash failure. In the approximate agreement problem, not all processes are required to agree on the same output, but they all need to be within a fixed Euclidean distance $\epsilon$. The following result was obtained by this paper\cite{b1} for the MBA problem, in a fully connected distributed system with up to f Byzantine failures:\\
--- In asynchronous systems, $n>(d+2)f$ is necessary and sufficient to solve the multidimensional approximate agreement problem.
-The assumptions for this algorithm includes FIFO, reliable communication channels, and fully connected distributed network. 
-For solving MBA, a protocol must satisfy the following conditions given by this paper\cite{b1}:\\
---``$Validity$. The output vector at all non-faulty processes must be inside the convex hull of the input inputs. Formally, $O_i \in Poly(I_G)$ for any $pi \in G.$ \\
---``$Termination$. Each non-faulty process must terminate within a finite amount of time.\\
-\begin{algorithm}
-\caption{The Mendes-Herlihy Algorithm}
-\begin{algorithmic}[1]
-\State $(R, v) \leftarrow $ CalculateRounds$($I$)$
-\For {m $\rightarrow$ 1,....,d}
-\State H$\leftarrow \varnothing$ 
-\State r$\leftarrow$ 1
-\While {$|H| \leqslant f$}
-\State RBSend$((p, m.r, v))$
-\State \textbf{upon} V $\leftarrow$ RBReceiveWitness$(m.r)$ \textbf{do}
-\Indent
-\State S $\leftarrow$ Safe$(V)$
-\State v $\leftarrow$ v $\in$ S such that v$[m]$ = Midpoint$(S(m))$ 
-\State \textbf{if} r $=$ R \textbf{then}
-\Indent 
-\State RBSend$((p, m.r, {halt}))$
-\EndIndent
-\State r $\leftarrow$ r $+$ 1
-\EndIndent
-\State \textbf{upon} RBRecv$((p', m.r', {halt})),$ with $r'\geqslant$ r \textbf{do}
-\Indent
-\State H $\leftarrow$ H $\cup$  $((p', m.r', {halt}))$
-\EndIndent
-\EndWhile
-\EndFor
-\State return v
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{p.CalculateRounds(I)}
-\begin{algorithmic}[1]
-\State $RBSend((p,0,I))$
-\State $(V,W) \gets (Val,Content(Wit)) from RBReceiveWitness(0)$
-\State $U \gets {barycenter of Safe_f(W'): W'\in W}$
-\State $v \gets barycenter of Safe_f(U)$
-\State $R \gets \lceil\log_2(\sqrt{d}/\epsilon) max(\sigma_U(m):1\leq m\leq d))\rceil$\\
-\Return $(R,v)$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{The Vaidya-Garg Algorithm}
-\begin{algorithmic}[1]
-\State $R \gets 1+\log_{1/(1-\gamma)}\frac{\sqrt{d}(U-v)}{\epsilon}$
-\For{r $\rightarrow$ 1,.... R}
-\State RBSend$((p,r,v))$
-\State \textbf{upon} M $\leftarrow$ RBReceiveWitness$(r)$\textbf{ do}
-\Indent
-\For{$M' \subseteq M, |M'|=n-f$}
-\State $S_{M'} \leftarrow Safe_f(M')$
-\State Z $\leftarrow$ Z $\cup$ DeterministicallyChoosePoint$(S_{M'})$
-\EndFor
-\State v $\leftarrow (\Sigma_{z \in Z}z)$ $/|Z|$
-\EndIndent
-\EndFor\\
-\Return $v$
-\end{algorithmic}
-\end{algorithm}
-
-\section{Implementation Setup}
-We choose to implement a robot convergence problem to examine the message and time complexity of each algorithm.We setup the same environment used to test both algorithms with the following properties:\\
-(1) There are total of 6 servers with 1 byzantine server.\\
-(2) Each server is fully connected to other servers with TCP connections.\\
-(3) Each server has an input of 2 dimensional vector that initially form a convex shape.\\
-(4) The byzantine server will initially send random input vector values to all other servers.\\
-(5) When implementing $if\ never\ sent$ in function $RBEcho_f$, we saved the sender's pid as key in a hash table and save the number of time we sent the corresponding message as value in the hash table.  \\
-(6) Since we are working on the 2 dimensional case of the MBA problem, we wrote our $Safe_f$ function based on the Safe Area definition, where we take intersection (see fig \ref{my_label1} of an exemple of how we took intersections\cite{b6})of any two $Restrict_f$ of the input message set and returns the vertices of the resulting convex hull. \\
-(7) In line 9 of algorithm 6, the process computes, $S(m)$ the projection of the safe area on coordinate $m$, then choose a point in the safe area such that its $m$-th coordinate is in the midpoint of $S(m)$. Here we choose the other coordinate such that it is in the midpoint of the interval of the safe area as well.  
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.5]{Capture.PNG}
-    \caption{Example results of take intersection of two convex hull.}
-    \label{my_label1}
-\end{figure}
-\section{Message Complexity Comparison}
- In MH algorithm, each non-faulty process spends $O(n^2)$ messages for reliable broadcast and the witness algorithm for each round. The overall message complexity for all the rounds is 
- \begin{equation}
-     O(n^2d\log(d/\epsilon\ max(\sigma_{I_G}(m):1\leq m\leq d)).
- \end{equation}
- In VG algorithm the overall message complexity for all the rounds is 
- \begin{equation}
-     O(n^2d\log_{1/(1-\gamma)}(d/\epsilon\  max(\sigma_{I_G}(m):1\leq m\leq d)).
- \end{equation}
-\section{Experimental Time Comparison}
-For live demo time result comparison, We setup a millisecond time counter that began at the initiation phase of running the algorithms, and logs the time elapsed. For the MH algorithm, initial calculate round function requires around 3000 milliseconds to complete. Both algorithms depend on reliable broadcast and receive witness, thus their time for each round is similar at around 3000 to 4000 milliseconds. The number of rounds needed for The VG algorithm is significantly higher than the MH algorithm, therefore the completion of MH algorithm is faster than the VG Algorithm. Since Our implementation of each process is thread based, accuracy of the logged elapsed time may not be true reflection of a real world implementation of these algorithms. 
-
-\section{Algorithm Comparison Observations}
-According to the original paper, ``MH\cite{b3} algorithm has an asymptotically constant convergence factor in relation to n, but requires certain geometrical operations too restrictive for applications such as robot navigation.  In such application, instead of exchanging messages, processes obtain information via visual sensors, projecting them over private coordinate systems. The VG\cite{b4} algorithm is better suited for the application above, at the cost of a slower convergence,now asymptotically dependent on n,the number of processes." \\
-
+\section{Conclusion}
 
 \section{Future Works}
-While implementing the two algorithms, we found it useful to create more comparative methods to show the convergence factor differences. More visualization tools would be useful in further displaying convergence comparisons.  
-During the implementation of this project, we focused on the 2-dimensional scenario, in the next step, we can further expand on the dimensions based on the linear programming algorithm provided in the appendix of the paper. \\
-Robot convergence is one of the more physically tangible application of byzantine vector consensus, other problems such as distributed voting can equally utilize the agreement.\\ 
 
 
-\begin{thebibliography}{00}
-\bibitem{b1} Mendes H, Herlihy M, Vaidya N, Garg VK. Multidimensional agreement in Byzantine systems. Distributed Computing. 2015 Dec 1;28(6):423-41.
-\bibitem{b2} Lamport, L., Shostak, R., Pease, M.: The byzantine generals problem. ACM Trans. Program. Lang. Syst. 4(3), 382–401 (1982).
-\bibitem{b3 }Mendes, H., Herlihy, M.: Multidimensional approximate agreementinbyzantineasynchronoussystems. In:Proceedings of the 45th annual ACM symposium on Symposium on theory of computing, STOC ’13, pp. 391–400. ACM, New York, NY, USA (2013). 
-\bibitem{b4} Vaidya,N.,Garg,V.K.:Byzantine vector consensus incomplete graphs. In: Proceedings of the 2013 ACM symposium on Principles of distributed computing, PODC ’13. ACM, New York, NY, USA (2013)
-\bibitem{b5}Potop-Butucaru, M., Raynal, M., Tixeuil, S.: Distributed computing with mobile robots: An introductory survey. In: 14th International Conference on Network-Based Information Systems (NBiS), pp. 318 –324 (2011). 
-\bibitem{b6}Intersection of Convex Polygons Algorithm, by By Sinan Oz, https://www.swtestacademy.com/intersection-convex-polygons-algorithm/
-\bibitem{b7}The Centroid of Convex Polygons by Gilles Bellot, https://bell0bytes.eu/centroid-convex/
-\end{thebibliography}
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,main}
+
 \end{document}
+
