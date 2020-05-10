@@ -22,7 +22,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{A comparative evaluation of gradient-based optimization algorithms for training Terrain GAN }
+\title{Terrain GAN optimizer study}
 
 \author{\IEEEauthorblockN{Kai Qin}
 \IEEEauthorblockA{\textit{Dept. of Electrical and Computer Engineering} \\
@@ -49,7 +49,36 @@ yh5598@utexas.edu}
 
 \section{Introduction}
 %Generative Adversarial Networks (GAN)\cite{goodfellow2014generative} have been wildy used in generative applications such as anime generation, human-face generation, and video generation. In this study, we focus on evaluating the performence of three gradient-based optimization algorithms in training GANs for procedural terrain generation\cite{beckham2017step}. "Procedural terrain generation for video games has been traditionally done with smartly designed but handcrafted algorithms that generate hightmaps" \cite{beckham2017step} $\{DESCRIBE\  dataset\}$ The first goal of this project is for us as a term project to extend what we have learned in class about gradient-based optimization algorithms and to dive deeper in this topic by experimenting with three state-of-the-art gradient based algorithm for training neural networks. The second goal is to explore the practical differences that each optimizer can make for TerrianGAN. The third goal is to understands the results of fine-tuning parameters on the different optimizers and their effects on TerrianGAN.
-Generative Adversarial Networks (GANs)\cite{goodfellow2014generative} have been wildly used in applications such as anime character generation, human-face generation, and video generation. In this study, we focused on evaluating the performances of three different gradient based optimizers on our TerrainGAN, explored the practical differences from using each optimizers, and discuss the results of fine-tuning hyper-parameters and visualize their effect on our GAN.
+Generative Adversarial Networks (GANs\cite{goodfellow2014generative}) have been wildly used in applications such as anime character generation, human-face generation, and video generation. In this study, we focused on evaluating the performances of three different gradient based optimizers on our TerrainGAN, explored the practical differences from using each optimizers, and discuss the results of fine-tuning hyper-parameters and visualize their effect on our GAN.
+
+\section{Terrain GAN}
+Traditionally, video game terrains have been either manually generated or procedually gendreatd by algorithms designed to mimic real-life terrains such as mountains, lakes, and coasts. These methods are capable of generating high quality terrains but also come with drawbacks such as high expense of human labour and the lack of flexibility and complexity of the nature. With the ability to recover the training data distribution \cite{goodfellow2014generative}, GAN becomes the perfect algorithm for this task. A first step towards conquering this problem using GAN has been proposed in \cite{beckham2017step}, where DCGAN and LSGAN have been applied to generate high quality heightmaps (see image \ref{theirheightmap}). In our project, we focus on evaluating the effects of different optimizers on LSGAN since it is suggested in the paper \cite{beckham2017step} that LSGAN provide better training stability than DCGAN.
+
+Following \cite{beckham2017step}, we found an open sourced NASA grayscale topography map of Earth. The value of the each tile is grayscale, ranging from 0 to 255. Higher value in the grayscale represents higher altitude such as mountain tops, while lower values represent valley or sea level. The 21600x10800 pixels high resolution map is subsequently divided into 128x128 pixel tiles, which provides about 14200 training data for our GAN. However, since about $70\%$ of Earth is water and therefore uninteresting in the purpose of generating terrain with variations, tiles that are purely sea level are removed, leaving about 4300 training tiles fit for training.
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{thereheightmap.PNG}
+    \caption{A redering of a generated heightmap in \cite{beckham2017step}}
+    \label{theirheightmap}
+\end{figure}
+One novelty of GAN is learning the training data distribution via an adversaria process. The training process consists of two steps as shown in the psudocode in figure \ref{ganalg}, where we first train the discriminator$G$ for $k$ steps, and then train the generator $D$ for one step. The number of steps to apply to the discriminator, $k$, is a hyperparameter. As in the GAN paper, we used $k=1$, the least expensive option, in all of our experiments in the next section.
+
+DCGAN and LSGAN are two variants of GAN, where DCGAN improves the orginal GAN with fine-tuned architecture details and showed us that GAN is capable of generating perceptually good samples (see figure \ref{dcgan2} and interpolations \cite{radford2015unsupervised}. And LSGAN adopted the least squares loss instead of the cross entropy as the objective function since the original loss function may lead to the vanishing gradients problem. 
+
+%We experimented linear interpolation with generated images but unable to visually tell what geographical features the trained GAN has learned.
+\begin{figure}
+    \centering
+    \includegraphics[scale=1]{dcgan2.PNG}
+    \caption{DCGAN samples on faces \cite{goodfellow2016deep}}
+    \label{dcgan2}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.45]{ganalg.PNG}
+    \caption{Minibatch stochastic gradient descent training of GAN \cite{goodfellow2014generative}}
+    \label{ganalg}
+\end{figure}
 
 
 \section{Gradient-based optimization algorithms review}
@@ -89,32 +118,6 @@ By combining both ideas of momentum and RMSProp, we get Adam optimization algori
     \label{adam}
 \end{figure}
 
-\section{Terrain GAN review}
-Traditionally, video game terrains have been either manually generated or procedually gendreatd by algorithms designed to mimic real-life terrains such as mountains, lakes, and coasts. These methods are capable of generating high quality terrains but also come with drawbacks such as high expense of human labour and the lack of flexibility and complexity of the nature. With the ability to recover the training data distribution \cite{goodfellow2014generative}, GAN becomes the perfect algorithm for this task. A first step towards conquering this problem using GAN has been proposed in \cite{beckham2017step}, where DCGAN and LSGAN have been applied to generate high quality heightmaps (see image \ref{theirheightmap}) from high-resolution earth heightmap data provided by NASA. In our project, we focus on evaluating the effects of different optimizers on LSGAN since it is suggested in the paper \cite{beckham2017step} that LSGAN provide better training stability than DCGAN. 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.4]{thereheightmap.PNG}
-    \caption{A redering of a generated heightmap in \cite{beckham2017step}}
-    \label{theirheightmap}
-\end{figure}
-One novelty of GAN is learning the training data distribution via an adversaria process. The training process consists of two steps as shown in the psudocode in figure \ref{ganalg}, where we first train the discriminator$G$ for $k$ steps, and then train the generator $D$ for one step. The number of steps to apply to the discriminator, $k$, is a hyperparameter. As in the GAN paper, we used $k=1$, the least expensive option, in all of our experiments in the next section.
-
-DCGAN and LSGAN are two variants of GAN, where DCGAN improves the orginal GAN with fine-tuned architecture details and showed us that GAN is capable of generating perceptually good samples (see figure \ref{dcgan2} and interpolations \cite{radford2015unsupervised}. And LSGAN adopted the least squares loss instead of the cross entropy as the objective function since the original loss function may lead to the vanishing gradients problem. 
-
-%We experimented linear interpolation with generated images but unable to visually tell what geographical features the trained GAN has learned.
-\begin{figure}
-    \centering
-    \includegraphics[scale=1]{dcgan2.PNG}
-    \caption{DCGAN samples on faces \cite{goodfellow2016deep}}
-    \label{dcgan2}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.45]{ganalg.PNG}
-    \caption{Minibatch stochastic gradient descent training of GAN \cite{goodfellow2014generative}}
-    \label{ganalg}
-\end{figure}
 
 
 \section{Experiments and results}
@@ -129,16 +132,15 @@ Sometime it oscilates and don't converge. That's one of the big challenge of GAN
 Adam 0.0002 lr and 16 batch size, we think based on the 3d model generated by this software looks realistic enough to meet our experience. We manually sweeped the lr rate and batch size using ADAM and collected the loss fuction over trainnign iterations. Next step will colecte results using other optimizers and figure out a metric to quantify the results we see. The discriminitor can always 
 
 \section{Discussion about metrics}
-As we have seen in the loss graphs, the oscilation of the loss makes it harder to measrue the training progress. Currently, it is still an open probelm to find good metrics for GAN training. On the other hand, If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it. Inception score \cite{salimans2016improved} and Frechet Inception Distance score (FID) \cite{heusel2017gans} are two state of the art metrics people use to measure the GAN performence. However, both metrics don't apply to the training data we have. Inception score requires categorical labeled data. FID requires a pre-trained classification neural network. Inspired by the goal of gan which is to learn the probability distribution from the training data, and implicitly represent it using neurual network, we propose a new metric to measure the Terrain GAN performance, the KL-divergence between normalized intensity histogram of training images and generated images.
+As we have seen in the loss function graphs, the oscillation makes it harder to measure the success of the training progress. Currently, it is still an open problem to find good metrics for GAN training. Simply put, If you have a validation metric, you can probably use it as the objective function and optimize against it. Inception score \cite{salimans2016improved} and Frechet Inception Distance score (FID\cite{heusel2017gans}) are two state of the art metrics people use to measure GAN performances. However, both metrics don’t apply to our training data. Inception score requires categorically labeled data and FID requires a pretrained classification neural network. Inspired by the goal of GAN to learn the probability distribution from the training data and implicitly represent it using neural networks, we propose a new metric to measure the TerrainGAN performance: the KL-divergence between normalized intensity histogram of training images and generated images.
 
-Before we explain how we calculate this metric, we need first introduce the idea of image intensity histogram, which is a widly used technique in image processing. It plots how many times each intensity value in an image occurs. Here we have a example of intensity histogram of a generated hight map in figure \ref{intensityhist}.
+Before we present how we calculated this metric, we need first introduce the idea of image intensity histogram, which is a widely used technique in image processing. The definition states the histograms plots how many times each intensity value in an image occurs. Here we have a example of intensity histogram of a generated heightmap in figure  \ref{intensityhist}. We then produce the distribution over a large set of images by calculating the average occurrences of each intensity value and divide it by the total number of pixels over all images, and defining it as the normalized histogram. The normalizatoin process also remaps the occurences to the same range $[0,1]$ as the probability distribution. Figure \ref{traininten} shows the normalized intensity histogram of the training images, and figure \ref{adaminten} shows the normalized intensity histogram of 50 generated image using the neural net trained by Adam with lr .0002 and batch-size 16 for 150 epochs. 
 \begin{figure}
     \centering
     \includegraphics[scale=0.45]{intensityhist.PNG}
     \caption{Image intensity histogram of a generated height map.}
     \label{intensityhist}
 \end{figure}
-However, we want the distribuion over a large set of images, the original intensity historgram doesn't work here, so we calculate the average occurrences of each intensity value and divide it by the total number of pixels over all images, and we call it the normalized histogram. The normalizatoin also remaps the occurences to the same range $[0,1]$ as the probability distribution. Image \ref{traininten} shows the normalized itensity histogram of the training images, and image \ref{adaminten} shows the normalized itensity histogram of 50 generated image using the neural net trianed by Adam with learning rate of $0.0002$ and batch size of 16 for 150 epchos. 
 \begin{figure}
     \centering
     \includegraphics[scale=0.55]{trainingintensity.PNG}
