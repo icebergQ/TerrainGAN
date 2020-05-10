@@ -1,0 +1,80 @@
+IEEEexample.bib 
+V1.12 (2007/01/11)
+Copyright (c) 2002-2007 by Michael Shell
+See: http://www.michaelshell.org/
+for current contact information.
+
+This is an example BibTeX database for the official IEEEtran.bst
+BibTeX style file.
+
+Some entries call strings that are defined in the IEEEabrv.bib file.
+Therefore, IEEEabrv.bib should be loaded prior to this file. 
+Usage: 
+
+\bibliographystyle{./IEEEtran}
+\bibliography{./IEEEabrv,./main}
+
+
+ 
+@misc{beckham2017step,
+    title={A step towards procedural terrain generation with GANs},
+    author={Christopher Beckham and Christopher Pal},
+    year={2017},
+    eprint={1707.03383},
+    archivePrefix={arXiv},
+    primaryClass={stat.ML}
+} 
+ 
+@misc{goodfellow2014generative,
+    title={Generative Adversarial Networks},
+    author={Ian J. Goodfellow and Jean Pouget-Abadie and Mehdi Mirza and Bing Xu and David Warde-Farley and Sherjil Ozair and Aaron Courville and Yoshua Bengio},
+    year={2014},
+    eprint={1406.2661},
+    archivePrefix={arXiv},
+    primaryClass={stat.ML}
+}
+
+@book{goodfellow2016deep,
+  title={Deep learning},
+  author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
+  year={2016},
+  publisher={MIT press}
+}
+
+LSGAN
+@misc{mao2016squares,
+    title={Least Squares Generative Adversarial Networks},
+    author={Xudong Mao and Qing Li and Haoran Xie and Raymond Y. K. Lau and Zhen Wang and Stephen Paul Smolley},
+    year={2016},
+    eprint={1611.04076},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
+}
+
+DCGAN
+@misc{radford2015unsupervised,
+    title={Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks},
+    author={Alec Radford and Luke Metz and Soumith Chintala},
+    year={2015},
+    eprint={1511.06434},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+}
+
+@misc{salimans2016improved,
+    title={Improved Techniques for Training GANs},
+    author={Tim Salimans and Ian Goodfellow and Wojciech Zaremba and Vicki Cheung and Alec Radford and Xi Chen},
+    year={2016},
+    eprint={1606.03498},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+}
+
+@misc{heusel2017gans,
+    title={GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},
+    author={Martin Heusel and Hubert Ramsauer and Thomas Unterthiner and Bernhard Nessler and Sepp Hochreiter},
+    year={2017},
+    eprint={1706.08500},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+}
