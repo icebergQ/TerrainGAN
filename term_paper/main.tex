@@ -48,7 +48,8 @@ yh5598@utexas.edu}
 % \end{IEEEkeywords}
 
 \section{Introduction}
-Generative Adversarial Networks (GAN)\cite{goodfellow2014generative} have been wildy used in generative applications such as anime generation, human-face generation, and video generation. In this study, we focus on evaluating the performence of three gradient-based optimization algorithms in training GANs for procedural terrain generation\cite{beckham2017step}. "Procedural terrain generation for video games has been traditionally done with smartly designed but handcrafted algorithms that generate hightmaps" \cite{beckham2017step} $\{DESCRIBE\  dataset\}$ The first goal of this project is for us as a term project to extend what we have learned in class about gradient-based optimization algorithms and to dive deeper in this topic by experimenting with three state-of-the-art gradient based algorithm for training neural networks. The second goal is to explore the practical differences that each optimizer can make for TerrianGAN. The third goal is to understands the results of fine-tuning parameters on the different optimizers and their effects on TerrianGAN.  
+%Generative Adversarial Networks (GAN)\cite{goodfellow2014generative} have been wildy used in generative applications such as anime generation, human-face generation, and video generation. In this study, we focus on evaluating the performence of three gradient-based optimization algorithms in training GANs for procedural terrain generation\cite{beckham2017step}. "Procedural terrain generation for video games has been traditionally done with smartly designed but handcrafted algorithms that generate hightmaps" \cite{beckham2017step} $\{DESCRIBE\  dataset\}$ The first goal of this project is for us as a term project to extend what we have learned in class about gradient-based optimization algorithms and to dive deeper in this topic by experimenting with three state-of-the-art gradient based algorithm for training neural networks. The second goal is to explore the practical differences that each optimizer can make for TerrianGAN. The third goal is to understands the results of fine-tuning parameters on the different optimizers and their effects on TerrianGAN.
+Generative Adversarial Networks (GANs)\cite{goodfellow2014generative} have been wildly used in applications such as anime character generation, human-face generation, and video generation. In this study, we focused on evaluating the performances of three different gradient based optimizers on our TerrainGAN, explored the practical differences from using each optimizers, and discuss the results of fine-tuning hyper-parameters and visualize their effect on our GAN.
 
 
 \section{Gradient-based optimization algorithms review}
@@ -80,7 +81,7 @@ Root mean squared prop (RMSProp) is another algorithm that can speed up the clas
 % ADAM was used in the original paper of DC GAN and LSGAN, and thus was our first choice optimizer.
 
 
-By combining both ideas of momentum and RMSProp, we get Adam optimization algorithm which has been shown to work well across a wider range of deep learning architectures. In Adam, in each iteration, in the first highlighted equation in figure \ref{adam} we first update the first moment estimate (the mean of the derivatives) , which is exactly what we had when we're implementing SGD with momentum. And similarly, we do the rms prop to update the second moment estimate in the second equation. Then we do bias corrections. Finally, we compute the update by dividing the bias corrected first moment estimate with the sqaure root of the second moment estimate and reversing the sign. Common choices for $\rho_1$, $\rho_2$, $\sigma$ are $0.9$, $0.99$ and $10^{-8}$ respectively. The common pratice for Adam hyperparameter tunning is to keep $\rho_1$,  $\rho_2$, and $\sigma$ default and try a range of values of the learning rate to see which works the best.
+By combining both ideas of momentum and RMSProp, we get Adam optimization algorithm which has been shown to work well across a wider range of deep learning architectures. In Adam, in each iteration, in the first highlighted equation in figure \ref{adam} we first update the first moment estimate (the mean of the derivatives) , which is exactly what we had when we're implementing SGD with momentum. And similarly, we do the rms prop to update the second moment estimate in the second equation. Then we do bias corrections. Finally, we compute the update by dividing the bias corrected first moment estimate with the sqaure root of the second moment estimate and reversing the sign. Common choices for $\rho_1$, $\rho_2$, $\sigma$ are $0.9$, $0.99$ and $10^{-8}$ respectively. In this study, we followed the common pratice for Adam hyperparameter tunning which keeps $\rho_1$,  $\rho_2$, and $\sigma$ as default and try a range of values of the learning rate to see which works the best.
 \begin{figure}
     \centering
     \includegraphics[scale=0.45]{adam.PNG}
@@ -130,50 +131,53 @@ Adam 0.0002 lr and 16 batch size, we think based on the 3d model generated by th
 \section{Discussion about metrics}
 As we have seen in the loss graphs, the oscilation of the loss makes it harder to measrue the training progress. Currently, it is still an open probelm to find good metrics for GAN training. On the other hand, If you had a really really good metric, you can propabally use it as a optimiztion critieria and optimize against it. Inception score \cite{salimans2016improved} and Frechet Inception Distance score (FID) \cite{heusel2017gans} are two state of the art metrics people use to measure the GAN performence. However, both metrics don't apply to the training data we have. Inception score requires categorical labeled data. FID requires a pre-trained classification neural network. Inspired by the goal of gan which is to learn the probability distribution from the training data, and implicitly represent it using neurual network, we propose a new metric to measure the Terrain GAN performance, the KL-divergence between normalized intensity histogram of training images and generated images.
 
-Before we introduce how we calculate this metric, we need first introduce the idea of image intensity histogram, which is a widly used technique in image processing. The definition is that the histograms plots how many times each intensity value in an image occurs. Here we have a example of intensity histogram of a generated hight map in figure \ref{intensityhist}.
+Before we explain how we calculate this metric, we need first introduce the idea of image intensity histogram, which is a widly used technique in image processing. It plots how many times each intensity value in an image occurs. Here we have a example of intensity histogram of a generated hight map in figure \ref{intensityhist}.
 \begin{figure}
     \centering
     \includegraphics[scale=0.45]{intensityhist.PNG}
     \caption{Image intensity histogram of a generated height map.}
     \label{intensityhist}
 \end{figure}
-
-However, we want the distribuion over a large set of images, the original intensity historgram doesn't work here, so we calculate the average occurrences of each intensity value and divide it by the total number of pixels over all images, and define it the normalized histogram. Image \ref{trainingintensity} shows the normalized itensity histogram of the training images, and image \ref{adamintensity} shows the normalized itensity histogram of 50 generated image using the neural net trianed by Adam with lr .0002 and batchsize 16 for 150 epchos. We can see that they both have mean around 30 gray levels.
-
+However, we want the distribuion over a large set of images, the original intensity historgram doesn't work here, so we calculate the average occurrences of each intensity value and divide it by the total number of pixels over all images, and we call it the normalized histogram. The normalizatoin also remaps the occurences to the same range $[0,1]$ as the probability distribution. Image \ref{traininten} shows the normalized itensity histogram of the training images, and image \ref{adaminten} shows the normalized itensity histogram of 50 generated image using the neural net trianed by Adam with learning rate of $0.0002$ and batch size of 16 for 150 epchos. 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.45]{trainingintensity.PNG}
-    \caption{Normalized image intensity histogram of the training dataset.}
-    \label{trainingintensity}
+    \includegraphics[scale=0.55]{trainingintensity.PNG}
+    \caption{Normalized image intensity histogram of the training dataset and an example training image.}
+    \label{traininten}
 \end{figure}
-
 \begin{figure}
     \centering
-    \includegraphics[scale=0.45]{adamintensity.PNG}
-    \caption{Normalized image intensity histogram of generated images.}
-    \label{adamintensity}
+    \includegraphics[scale=0.55]{adamintensity.PNG}
+    \caption{Normalized image intensity histogram of generated images from LSGAN trained by ADAM with $lr=0.0002$ and $batchsize=16$ and a sample image. KL divergence of normalized intensity histogram equals $1.62$}
+    \label{adaminten}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.55]{sgdintensity.PNG}
+    \caption{Normalized image intensity histogram of generated images from LSGAN trained by SGD with $lr=0.0001$ and $batchsize=16$ and a sample image. KL divergence of normalized intensity histogram equals $+\infty$}
+    \label{sgdinten}
 \end{figure}
 
-Finally, Here is the KL divergence equation. In our case the P(x) is the real dist and QX is the generated hight map. From the normalized histogram we can tell that the ADAM has more overlap than the sgd. This also matches what we see from the generated images. And the KL divergence value confirmed our observations. The SGD with this set of hyper prameter has no overlap with the training data thus the KL div is +inf.
-$$
-D_{KL}(P||Q)=\sum_{x\in \chi}{P(x)log(P(x)/Q(x)}
-$$
 
-Here is a bar plot of the KL divergence of different hyperprameter settings of adam after 150 ephch. Visually, we  can see that the higher the metric, the harder you can provide some geographic meaning to the generated images.
+Given the normalized image intensity histograms of the training data and generated samples, we can calculate the KL divergence using equation (\ref{kldiv}), where $P(x)$ is the training data distribution and $Q(x)$ is the generated sample disctribution. Using the training dataset normalized histogram in image \ref{traininten} as a reference distribution, image \ref{adaminten} shows a normalized histogram with KL-divegence of $1.62$ and image \ref{sgdinten} shows a normalized histogram with KL-divergence of $+\infty$. We get a positive infinity since the training data and the generated data in figure \ref{sgdinten} have no overlap in normalized histogram. 
+\begin{equation}
+\label{kldiv}
+  D_{KL}(P||Q)=\sum_{x\in \chi}{P(x)log(P(x)/Q(x))}
+\end{equation}
+This metric has been utilized in measuring the quality of different hyperparameters when use Adam to train LSGAN. Figure \ref{klbar} shows a bar plot of the KL divergence of different hyperprameter settings of Adam after 150 ephchs. Visually, we  can see that the higher the metric, the harder you can provide some geographic meaning to the generated images.
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.45]{klbar.PNG}
+    \caption{Normalized histogram KL divergence of generated samples vs. different Adam learning rate and batch size}
+    \label{klbar}
+\end{figure}
 
-Again, we have all the results of the lowest KL divergence model.
+%Compare performence of each optimizer:
+%we need a metric to tell if the generated image is good or bad.
+%Based on our goal, we want noticeable feasures like mountains or lakes, valley, coasts.
 
-1 pixel is 1 square km;
-Original image pixel 21600x10800, and with 128x128 there are 14000, we excluded the ocean by excluding images with 90 percent pixels with max minors min value less than 0.05 (total range is from 0 to 1). And we end up with 4305. We have excluded flat land and waters, so we expect no such images from the output. We propose a metric of max -min / min as a metric.
-
-Compare performence of each optimizer:
-we need a metric to tell if the generated image is good or bad.
-Based on our goal, we want noticeable feasures like mountains or lakes, valley, coasts.
-Compare min-max diff histogram of the trainning data and the output data.
-
-Distribution distances: KL-divergence
 \section{Conclusion}
-
+%We definitely learned a lot about different optimizers and a lot about GAN, DCGAN, LSGAN. shou huo hen da
 \section{Future Works}
 
 
